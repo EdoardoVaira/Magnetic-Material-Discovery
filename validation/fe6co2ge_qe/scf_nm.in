@@ -1,0 +1,45 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'fe6co2ge_nm'
+  pseudo_dir = './pseudo'
+  outdir = './tmp/fe6co2ge_nm'
+  verbosity = 'high'
+/
+&SYSTEM
+  ibrav = 0
+  nat = 9
+  ntyp = 3
+  input_dft = 'pbesol'
+  ecutwfc = 60
+  ecutrho = 480
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.04
+/
+&ELECTRONS
+  conv_thr = 1.0d-5
+  electron_maxstep = 100
+  diagonalization = 'cg'
+  mixing_mode = 'local-TF'
+  mixing_beta = 0.20
+/
+ATOMIC_SPECIES
+  Fe 55.845 Fe.pbesol-spn-kjpaw_psl.1.0.0.UPF
+  Co 58.933195 Co.pbesol-spn-rrkjus_psl.0.3.1.UPF
+  Ge 72.630 Ge.pbe-kjpaw.UPF
+CELL_PARAMETERS angstrom
+  4.02666700 0.00000000 0.00000000
+  -2.01333323 3.48789002 0.00000000
+  0.00000000 0.00000000 7.46125600
+ATOMIC_POSITIONS crystal
+  Fe 0.000000 0.000000 0.995693
+  Fe 0.000000 0.000000 0.334903
+  Fe 0.666666 0.333333 0.449431
+  Fe 0.333333 0.666666 0.554717
+  Fe 0.000000 0.000000 0.668159
+  Fe 0.333333 0.666666 0.888597
+  Co 0.333333 0.666666 0.224764
+  Co 0.666666 0.333333 0.773886
+  Ge 0.666666 0.333333 0.109847
+K_POINTS automatic
+  4 4 3 0 0 0

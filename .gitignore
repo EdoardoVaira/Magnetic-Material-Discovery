@@ -1,0 +1,14 @@
+__pycache__/
+.pytest_cache/
+.venv/
+.venv-chgnet/
+*.egg-info/
+*.pyc
+.DS_Store
+.claude/
+
+data/raw/
+data/processed/
+runs/
+validation/**/tmp/
+validation/**/backups/

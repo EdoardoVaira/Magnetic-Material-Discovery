@@ -1,0 +1,54 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'vfe15_fm_debug'
+  pseudo_dir = './pseudo'
+  outdir = './tmp/vfe15_fm_debug'
+  verbosity = 'high'
+/
+&SYSTEM
+  ibrav = 0
+  nat = 16
+  ntyp = 2
+  input_dft = 'pbesol'
+  ecutwfc = 60
+  ecutrho = 480
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.04
+  nspin = 2
+  starting_magnetization(1) = 0.30
+  starting_magnetization(2) = 0.60
+/
+&ELECTRONS
+  conv_thr = 1.0d-5
+  electron_maxstep = 100
+  diagonalization = 'cg'
+  mixing_mode = 'local-TF'
+  mixing_beta = 0.20
+/
+ATOMIC_SPECIES
+  V  50.9415 V.pbesol-spnl-kjpaw_psl.1.0.0.UPF
+  Fe 55.845 Fe.pbesol-spn-kjpaw_psl.1.0.0.UPF
+CELL_PARAMETERS angstrom
+  5.69676400 0.00000000 0.00000000
+  0.00000000 5.69676400 0.00000000
+  0.00000000 0.00000000 5.69676400
+ATOMIC_POSITIONS crystal
+  V  0.000000 0.000000 0.000000
+  Fe 0.500000 0.500000 0.500000
+  Fe 0.500000 0.000000 0.500000
+  Fe 0.500000 0.500000 0.000000
+  Fe 0.000000 0.500000 0.500000
+  Fe 0.500000 0.000000 0.000000
+  Fe 0.000000 0.000000 0.500000
+  Fe 0.000000 0.500000 0.000000
+  Fe 0.250069 0.250069 0.250069
+  Fe 0.250069 0.749931 0.250069
+  Fe 0.250069 0.250069 0.749931
+  Fe 0.749931 0.250069 0.250069
+  Fe 0.749931 0.749931 0.250069
+  Fe 0.250069 0.749931 0.749931
+  Fe 0.749931 0.250069 0.749931
+  Fe 0.749931 0.749931 0.749931
+K_POINTS automatic
+  4 4 4 0 0 0

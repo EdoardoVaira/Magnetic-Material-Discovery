@@ -1,0 +1,61 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'fe6co2ge_soc_smoke_100'
+  pseudo_dir = './pseudo'
+  outdir = './tmp/fe6co2ge_soc_smoke_100'
+  verbosity = 'high'
+/
+&SYSTEM
+  ibrav = 0
+  nat = 9
+  ntyp = 3
+  input_dft = 'pbesol'
+  ecutwfc = 60
+  ecutrho = 480
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.03
+  noncolin = .true.
+  lspinorb = .true.
+  starting_spin_angle = .true.
+  starting_magnetization(1) = 0.60
+  starting_magnetization(2) = 0.55
+  starting_magnetization(3) = 0.00
+  angle1(1) = 90.0
+  angle1(2) = 90.0
+  angle1(3) = 90.0
+  angle2(1) = 0.0
+  angle2(2) = 0.0
+  angle2(3) = 0.0
+  constrained_magnetization = 'atomic direction'
+  lambda = 0.5
+  nosym = .true.
+  noinv = .true.
+/
+&ELECTRONS
+  conv_thr = 1.0d-6
+  electron_maxstep = 120
+  diagonalization = 'cg'
+  mixing_mode = 'local-TF'
+  mixing_beta = 0.10
+/
+ATOMIC_SPECIES
+  Fe 55.845 Fe.rel-pbesol-spn-kjpaw_psl.1.0.0.UPF
+  Co 58.933195 Co.rel-pbesol-spn-kjpaw_psl.0.3.1.UPF
+  Ge 72.630 Ge.rel-pbesol-dn-kjpaw_psl.1.0.0.UPF
+CELL_PARAMETERS angstrom
+  4.02666700 0.00000000 0.00000000
+  -2.01333323 3.48789002 0.00000000
+  0.00000000 0.00000000 7.46125600
+ATOMIC_POSITIONS crystal
+  Fe 0.000000 0.000000 0.995693
+  Fe 0.000000 0.000000 0.334903
+  Fe 0.666666 0.333333 0.449431
+  Fe 0.333333 0.666666 0.554717
+  Fe 0.000000 0.000000 0.668159
+  Fe 0.333333 0.666666 0.888597
+  Co 0.333333 0.666666 0.224764
+  Co 0.666666 0.333333 0.773886
+  Ge 0.666666 0.333333 0.109847
+K_POINTS automatic
+  4 4 3 0 0 0

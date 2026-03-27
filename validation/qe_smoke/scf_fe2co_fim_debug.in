@@ -1,0 +1,46 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'fe2co_fim_debug'
+  pseudo_dir = '/sw/pkg/QuantumESPRESSO/7.4.1/pseudo'
+  outdir = './tmp/fe2co_fim_debug'
+  verbosity = 'high'
+/
+&SYSTEM
+  ibrav = 0
+  nat = 6
+  ntyp = 3
+  input_dft = 'pbesol'
+  ecutwfc = 60
+  ecutrho = 480
+  occupations = 'smearing'
+  smearing = 'mv'
+  degauss = 0.04
+  nspin = 2
+  starting_magnetization(1) = 0.60
+  starting_magnetization(2) = -0.50
+  starting_magnetization(3) = 0.20
+/
+&ELECTRONS
+  conv_thr = 1.0d-5
+  electron_maxstep = 80
+  diagonalization = 'cg'
+  mixing_mode = 'local-TF'
+  mixing_beta = 0.20
+/
+ATOMIC_SPECIES
+  Fe1 55.845 Fe.pbesol-spn-kjpaw_psl.1.0.0.UPF
+  Fe2 55.845 Fe.pbesol-spn-kjpaw_psl.1.0.0.UPF
+  Co  58.933195 Co.pbesol-spn-rrkjus_psl.0.3.1.UPF
+CELL_PARAMETERS angstrom
+  4.03336300 0.00000000 0.00000000
+  -2.01668150 3.49310990 0.00000000
+  0.00000000 0.00000000 4.93488000
+ATOMIC_POSITIONS crystal
+  Fe1 0.333333 0.666667 0.667473
+  Fe1 0.666667 0.333333 0.332527
+  Fe2 0.000000 0.000000 0.500000
+  Fe2 0.000000 0.000000 0.000000
+  Co  0.666667 0.333333 0.834736
+  Co  0.333333 0.666667 0.165264
+K_POINTS automatic
+  4 4 3 0 0 0

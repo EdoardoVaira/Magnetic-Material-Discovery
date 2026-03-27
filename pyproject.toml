@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magnets"
+version = "0.1.0"
+description = "Magnetic materials screening with periodic graph neural networks."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "mp-api>=0.45.0",
+  "numpy>=1.26",
+  "plotly>=5.0.0",
+  "pymatgen>=2024.5.1",
+  "torch>=2.2",
+  "torch-geometric>=2.5",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]

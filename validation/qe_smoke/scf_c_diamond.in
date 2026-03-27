@@ -1,0 +1,30 @@
+&CONTROL
+  calculation = 'scf'
+  prefix = 'c_diamond_smoke'
+  pseudo_dir = '/sw/pkg/QuantumESPRESSO/7.4.1/pseudo'
+  outdir = './tmp/c_diamond_smoke'
+  verbosity = 'high'
+/
+&SYSTEM
+  ibrav = 2
+  celldm(1) = 6.7409
+  nat = 2
+  ntyp = 1
+  input_dft = 'pbe'
+  ecutwfc = 50
+  ecutrho = 200
+  occupations = 'fixed'
+/
+&ELECTRONS
+  conv_thr = 1.0d-8
+  electron_maxstep = 80
+  diagonalization = 'cg'
+  mixing_beta = 0.4
+/
+ATOMIC_SPECIES
+  C 12.011 C.pbe-n-kjpaw_psl.1.0.0.UPF
+ATOMIC_POSITIONS crystal
+  C 0.00 0.00 0.00
+  C 0.25 0.25 0.25
+K_POINTS automatic
+  4 4 4 0 0 0
