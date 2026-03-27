@@ -1,17 +1,74 @@
-# Magnets
+# Magnetic Material Discovery
 
-One clean path for magnetic materials screening from crystal structures.
+End-to-end magnetic materials discovery from crystal structures:
 
-The repo is now organized around exactly four things:
+- build a unified magnetic dataset
+- train a multitask crystal GNN
+- screen large candidate sets such as GNoME
+- validate the best hits with DFT
 
-1. one dataset builder
-2. one model
-3. one training script
-4. a small set of screening / cluster utilities
+This repo is the working codebase behind that pipeline. It is focused on magnetic ordering, magnetic moment, stability, and follow-up anisotropy checks for rare-earth-free permanent-magnet candidates.
 
-## What The Dataset Supports
+![Model pipeline overview](image.png)
 
-These are the core crystal-level targets the current dataset supports cleanly:
+The diagram above shows the core screening loop in this repo: crystal structure in, multitask magnetic and stability predictions out.
+
+## What This Project Does
+
+The project combines fast ML screening with slower first-principles validation:
+
+1. merge public crystal and magnetic-property sources into one masked multitask dataset
+2. train a periodic graph neural network on magnetic and stability targets
+3. run the trained model over large candidate structure sets
+4. take the best candidates into DFT for physical validation
+
+The target use case is simple:
+
+- use ML to search huge structure spaces quickly
+- use DFT only on a small shortlist
+- identify materials that look like real magnetic or permanent-magnet candidates
+
+## Current Highlight
+
+The main validated example in this repo right now is `Fe6Co2Ge`.
+
+Current first-pass story:
+
+- the GNN predicts `Fe6Co2Ge` as a strong `FM` candidate
+- simple DFT confirms `FM` is clearly favored over `NM`
+- a first-pass SOC force-theorem calculation gives a large positive anisotropy with easy axis along `[001]`
+
+The current frozen result note is:
+
+- [`validation/fe6co2ge_mae_qe/Fe6Co2Ge_result_summary_2026-03-27.md`](validation/fe6co2ge_mae_qe/Fe6Co2Ge_result_summary_2026-03-27.md)
+
+This should be treated as an exciting candidate result, not as a final publication-grade claim without tighter verification.
+
+## Repository Layout
+
+Core project files:
+
+- [`dataset.py`](dataset.py)
+  Unified dataset builder and dataset definitions.
+- [`model.py`](model.py)
+  Multitask periodic GNN for scalar and magnetic outputs.
+- [`train.py`](train.py)
+  Main training entrypoint.
+- [`screen.py`](screen.py)
+  Screening utilities for running trained checkpoints on candidate crystal sets.
+
+Supporting project areas:
+
+- [`scripts/cluster/`](scripts/cluster/)
+  Slurm helpers and QE cluster utilities.
+- [`tests/`](tests/)
+  Unit tests for dataset, graph building, model, training, and screening utilities.
+- [`validation/`](validation/)
+  DFT inputs, validation notes, and candidate-specific follow-up runs.
+
+## Main Targets
+
+The current dataset / model path supports these crystal-level targets:
 
 - `energy_above_hull`
 - `formation_energy_per_atom`
@@ -20,29 +77,28 @@ These are the core crystal-level targets the current dataset supports cleanly:
 - `ordering` as `NM / FM / FiM / AFM`
 - `site_moments`
 
-Transition temperatures are handled more carefully:
+Temperature handling is more conservative:
 
 - `transition_temperature_k`
-  - only for trusted structure-matched labels
-  - currently supported from MAGNDATA and any CIF/mcif dataset you provide
+  Only for trusted structure-matched labels.
 - `transition_temperature_hint_k`
-  - formula-matched experimental hint metadata
-  - not meant to be treated as ground-truth supervision
+  Formula-level hint metadata, not default ground truth.
 
-## Minimal Repo Layout
+## Data Sources
 
-- [dataset.py](/Users/edo/Edo/Magnets/dataset.py)
-  The single dataset builder and dataset definitions.
-- [model.py](/Users/edo/Edo/Magnets/model.py)
-  The single scalar/vector site-first multitask model architecture.
-- [train.py](/Users/edo/Edo/Magnets/train.py)
-  The single training entrypoint.
-- [screen.py](/Users/edo/Edo/Magnets/screen.py)
-  Screening utilities.
-- [scripts/cluster](/Users/edo/Edo/Magnets/scripts/cluster)
-  Slurm helpers.
+The unified dataset pipeline can merge or download from:
 
-Everything else is support code for data loading, graph building, metrics, and visualization.
+- Materials Project
+- JARVIS
+- NEMAD
+- MAGNDATA
+- structure-resolved CIF plus `Tc/TN` labels when available
+
+It also supports:
+
+- structure-aware deduplication across sources
+- formula-level `Tc/TN` hint overlays
+- loading existing JSONL dumps instead of redownloading everything
 
 ## Install
 
@@ -52,15 +108,15 @@ Install `torch` and `torch-geometric` in the way your machine requires, then:
 pip install -e ".[dev]"
 ```
 
-For Materials Project downloads:
+If you want to download Materials Project data:
 
 ```bash
 export MP_API_KEY=...
 ```
 
-## 1. Build The Unified Dataset
+## Quick Start
 
-Use the single dataset script:
+### 1. Build the unified dataset
 
 ```bash
 python3 dataset.py \
@@ -70,7 +126,7 @@ python3 dataset.py \
   --max-sites 40
 ```
 
-For the full public build:
+A fuller public build can look like:
 
 ```bash
 python3 dataset.py \
@@ -88,40 +144,7 @@ python3 dataset.py \
   --magnetic-csv data/raw/sources/nemad_magnetic.csv
 ```
 
-What it can do:
-- download MP records directly
-- download the public JARVIS dump automatically
-- download the public NEMAD GitHub CSVs automatically
-- crawl MAGNDATA for trusted structure-resolved `Tc/TN` data
-- load an existing MP JSONL instead of downloading
-- normalize raw JARVIS JSON exports
-- merge structure-matched CIF + `Tc/TN` datasets when available
-- overlay sparse formula-matched experimental `Tc/TN` as hint metadata
-- deduplicate cross-source records by structure-aware matching
-
-Useful inputs:
-- `--base-jsonl path/to/base.jsonl`
-- `--jarvis-json path/to/jarvis_dump.json`
-- `--download-jarvis`
-- `--jarvis-download-dir data/raw/sources`
-- `--curie-csv path/to/curie.csv`
-- `--neel-csv path/to/neel.csv`
-- `--magnetic-csv path/to/nemad_magnetic.csv`
-- `--download-nemad-github`
-- `--nemad-download-dir data/raw/sources`
-- `--cif-tc-dir path/to/cifs --cif-tc-labels path/to/labels.csv`
-- `--download-magndata --magndata-max-entries 250`
-- `--download-all-public-sources`
-- `--full-mp`
-- `--allow-formula-tc-enrichment`
-
-The output is one masked multitask JSONL plus a manifest:
-- dataset: `data/raw/magnetic_unified.jsonl`
-- manifest: `data/raw/magnetic_unified.manifest.json`
-
-## 2. Train The Model
-
-Use the single training script:
+### 2. Train the model
 
 ```bash
 python3 train.py \
@@ -130,31 +153,9 @@ python3 train.py \
   --output-dir runs/magnetic_model
 ```
 
-The trainer uses masked multitask losses, so a record does not need every label.
+The trainer uses masked multitask losses, so each record can contribute only to the targets it actually has.
 
-Main loss heads:
-- `energy_above_hull`
-- `formation_energy_per_atom`
-- `band_gap`
-- `moment_per_atom`
-- `site_moments`
-- `transition_temperature_k` when trusted structure-level labels are present
-- `ordering`
-
-Only add `transition_temperature_k` as a supervised head once you have
-structure-matched experimental labels. Formula-only `transition_temperature_hint_k`
-should be treated as metadata, not default ground truth.
-
-Useful options:
-- `--holdout-material-ids-json` for leak-free evaluation
-- `--balanced-sampler` to emphasize the rare ordering classes
-- `--formation-energy-loss-weight`
-- `--band-gap-loss-weight`
-- `--transition-temperature-loss-weight`
-- `--magnetic-loss-weight`
-- `--moment-consistency-loss-weight`
-
-## 3. Screen GNoME
+### 3. Screen candidate structures
 
 ```bash
 python3 screen.py \
@@ -164,37 +165,58 @@ python3 screen.py \
   --output-dir runs/gnome_screen
 ```
 
-The screening output keeps the full model output set for each candidate:
-- hull
-- formation energy
+The screening outputs can include:
+
+- hull / formation energy predictions
 - band gap
-- moment per atom
+- magnetic moment
 - site moments
 - ordering probabilities
+- transition temperature predictions if that head is present
 
-If a later model includes a trusted `transition_temperature_k` head, screening can
-surface that too.
+## Cluster / DFT Workflow
 
-## Cluster
+Relevant cluster helpers:
 
-Relevant Slurm helpers:
-- [scripts/cluster/train_masked_multitask_mp.slurm](/Users/edo/Edo/Magnets/scripts/cluster/train_masked_multitask_mp.slurm)
-- [scripts/cluster/screen_gnome_masked.slurm](/Users/edo/Edo/Magnets/scripts/cluster/screen_gnome_masked.slurm)
+- [`scripts/cluster/train_masked_multitask_mp.slurm`](scripts/cluster/train_masked_multitask_mp.slurm)
+- [`scripts/cluster/screen_gnome_masked.slurm`](scripts/cluster/screen_gnome_masked.slurm)
+- [`scripts/cluster/qe_pw.slurm`](scripts/cluster/qe_pw.slurm)
+- [`scripts/cluster/qe_prepare_force_theorem_state.sh`](scripts/cluster/qe_prepare_force_theorem_state.sh)
+- [`scripts/cluster/qe_clone_restart_state.sh`](scripts/cluster/qe_clone_restart_state.sh)
 
-## Next Time You Come Back
+The DFT validation history and candidate-specific inputs are kept under [`validation/`](validation/).
 
-Do not branch the codebase again into multiple model families.
+Useful notes:
 
-The next work should stay on this single path:
-
-1. improve the unified dataset
-2. improve `model.py`
-3. retrain with the same trainer
-4. rerun screening
+- [`validation/DFT_validation_summary.md`](validation/DFT_validation_summary.md)
+- [`validation/fe6co2ge_mae_qe/Fe6Co2Ge_result_summary_2026-03-27.md`](validation/fe6co2ge_mae_qe/Fe6Co2Ge_result_summary_2026-03-27.md)
 
 ## Tests
 
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-python3 -m compileall src
 ```
+
+## What Is Not In Git
+
+Large generated artifacts are intentionally ignored:
+
+- `data/raw/`
+- `data/processed/`
+- `runs/`
+- QE `tmp/` and backup directories under `validation/`
+
+This keeps the repo small and suitable for a private code snapshot while leaving heavyweight data and cluster artifacts outside git.
+
+## Project Status
+
+This is an active research codebase, not a polished library release.
+
+Current direction:
+
+- keep one unified dataset path
+- keep one main model/training path
+- use screening to produce high-value magnetic candidates
+- use DFT only for the shortlist
+
+The immediate scientific goal is to turn the ML + DFT pipeline into a repeatable engine for identifying strong rare-earth-free magnetic materials, with `Fe6Co2Ge` as the current lead example.
